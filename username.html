@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Username Generator</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <nav>
+    <ul>
+      <li><a class="nav-home" href="index.html">Home</a></li>
+      <li><a class="nav-tools" href="tools.html">Tools</a></li>
+      <li><a class="nav-products" href="products.html">Products</a></li>
+      <li><a class="nav-contact" href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div class="container">
+  <h1>Username Generator</h1>
+  <p class="sub">Quick names for games, socials, and accounts.</p>
+
+  <div class="card">
+    <label>Style</label>
+    <select id="style">
+      <option value="clean">Clean</option>
+      <option value="gamer">Gamer</option>
+      <option value="short">Short</option>
+    </select>
+
+    <label>How many?</label>
+    <input id="count" type="number" min="1" max="20" value="10">
+
+    <div style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn" type="button" id="gen">Generate</button>
+      <button class="btn" type="button" id="copy">Copy all</button>
+      <button class="btn" type="button" id="clear">Clear</button>
+    </div>
+
+    <label style="margin-top:14px;">Results</label>
+    <textarea id="out" readonly placeholder="Click Generate"></textarea>
+
+    <p class="note" id="msg" style="margin-top:10px;"></p>
+  </div>
+</div>
+
+<script>
+  const styleEl = document.getElementById("style");
+  const countEl = document.getElementById("count");
+  const outEl = document.getElementById("out");
+  const msgEl = document.getElementById("msg");
+
+  const adjectives = ["Swift","Silent","Brave","Pixel","Neon","Frost","Crimson","Shadow","Nova","Iron","Solar","Rapid","Storm","Ghost","Lunar","Turbo"];
+  const nouns = ["Wolf","Tiger","Falcon","Ninja","Coder","Ranger","Knight","Viper","Golem","Samurai","Wizard","Pilot","Titan","Runner","Sparrow","Gamer"];
+
+  function rand(arr){
+    const r = new Uint32Array(1);
+    crypto.getRandomValues(r);
+    return arr[r[0] % arr.length];
+  }
+
+  function randNum(min, max){
+    const r = new Uint32Array(1);
+    crypto.getRandomValues(r);
+    return min + (r[0] % (max - min + 1));
+  }
+
+  function makeOne(style){
+    const a = rand(adjectives);
+    const n = rand(nouns);
+
+    if (style === "short") {
+      const base = (a.slice(0,3) + n.slice(0,3)).toLowerCase();
+      return base + randNum(10,99);
+    }
+
+    if (style === "gamer") {
+      const extras = ["xX","_","-",""];
+      const pre = rand(extras);
+      const post = rand(extras);
+      return pre + a + n + randNum(1,999) + post;
+    }
+
+    const join = ["","_","."];
+    return a + rand(join) + n + randNum(1,99);
+  }
+
+  function generate(){
+    msgEl.textContent = "";
+    const style = styleEl.value;
+    const count = Math.max(1, Math.min(20, Number(countEl.value || 10)));
+
+    const results = [];
+    for(let i=0;i<count;i++){
+      results.push(makeOne(style));
+    }
+    outEl.value = results.join("\n");
+  }
+
+  document.getElementById("gen").addEventListener("click", generate);
+
+  document.getElementById("copy").addEventListener("click", async () => {
+    if(!outEl.value){ msgEl.textContent = "Nothing to copy yet."; return; }
+    try {
+      await navigator.clipboard.writeText(outEl.value);
+      msgEl.textContent = "Copied.";
+    } catch {
+      outEl.select();
+      document.execCommand("copy");
+      msgEl.textContent = "Copied.";
+    }
+  });
+
+  document.getElementById("clear").addEventListener("click", () => {
+    outEl.value = "";
+    msgEl.textContent = "";
+  });
+
+  generate();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Text Cleaner</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <nav>
+    <ul>
+      <li><a class="nav-home" href="index.html">Home</a></li>
+      <li><a class="nav-tools" href="tools.html">Tools</a></li>
+      <li><a class="nav-products" href="products.html">Products</a></li>
+      <li><a class="nav-contact" href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div class="container">
+  <h1>Text Cleaner</h1>
+  <p class="sub">Fix messy text: remove extra spaces and blank lines.</p>
+
+  <div class="card">
+    <label>Paste your text</label>
+    <textarea id="in" placeholder="Paste messy text here..."></textarea>
+
+    <div style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn" type="button" id="clean">Clean</button>
+      <button class="btn" type="button" id="copy">Copy</button>
+      <button class="btn" type="button" id="clear">Clear</button>
+    </div>
+
+    <label style="margin-top:14px;">Clean result</label>
+    <textarea id="out" readonly placeholder="Your cleaned text will show here..."></textarea>
+
+    <p class="note" id="msg" style="margin-top:10px;"></p>
+  </div>
+</div>
+
+<script>
+  const inEl = document.getElementById("in");
+  const outEl = document.getElementById("out");
+  const msgEl = document.getElementById("msg");
+
+  function cleanText(text){
+    // normalise line endings
+    text = text.replace(/\r\n/g, "\n");
+
+    // trim each line + remove extra spaces inside lines
+    const lines = text.split("\n").map(l => l.trim().replace(/\s+/g, " "));
+
+    // remove repeated blank lines
+    const out = [];
+    let blank = false;
+    for (const line of lines){
+      if (line === ""){
+        if (!blank) out.push("");
+        blank = true;
+      } else {
+        out.push(line);
+        blank = false;
+      }
+    }
+
+    return out.join("\n").trim();
+  }
+
+  document.getElementById("clean").addEventListener("click", () => {
+    msgEl.textContent = "";
+    outEl.value = cleanText(inEl.value);
+    if (!inEl.value.trim()) msgEl.textContent = "Paste some text first.";
+  });
+
+  document.getElementById("copy").addEventListener("click", async () => {
+    if(!outEl.value){ msgEl.textContent = "Nothing to copy yet."; return; }
+    try {
+      await navigator.clipboard.writeText(outEl.value);
+      msgEl.textContent = "Copied.";
+    } catch {
+      outEl.select();
+      document.execCommand("copy");
+      msgEl.textContent = "Copied.";
+    }
+  });
+
+  document.getElementById("clear").addEventListener("click", () => {
+    inEl.value = "";
+    outEl.value = "";
+    msgEl.textContent = "";
+  });
+</script>
+
+</body>
+</html>
